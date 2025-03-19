@@ -20,12 +20,35 @@
 
 // returns list of legal moves
 std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, bool white_turn) {
-    std::vector<std::vector<int>> moves;
+    std::vector<std::vector<int>> moves; // list of legal moves
     if (check(board) == 2 || check(board) == -2) {
         // std::cout << "legal_moves: game is over" << std::endl;
         return moves;
     }
-    std::vector<std::vector<int>> occupied; // if 1 then the 
+    if (white_turn) {
+        for (int piece = 0; piece < 6; ++piece) {
+            for (int i = 0; i < 64; ++i) { // look for piece to move
+                if (board[piece][i] == 1) { // a piece is selected
+                    for (int dest = 0; dest < 64; ++dest) { // look for legal places to move it to
+                        if (check_move(board, piece, {i, dest}))
+                            moves.push_back({i, dest});
+                    }
+                }
+            }
+        }
+    } else {
+        for (int piece = 0; piece < 6; ++piece) {
+            for (int i = 0; i < 64; ++i) { // look for piece to move
+                if (board[piece + 6][i] == 1) { // a piece is selected
+                    for (int dest = 0; dest < 64; ++dest) { // look for legal places to move it to
+                        if (check_move(board, piece, {i, dest}))
+                            moves.push_back({i, dest});
+                    }
+                }
+            }
+        }
+    }
+    return moves;
 }
 
 // check if a move is legal
