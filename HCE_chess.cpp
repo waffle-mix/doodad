@@ -18,6 +18,83 @@
     return 0.1;
 } */
 
+// convert move data in index form to a long algebraic notation string
+std::string notation_conv(std::vector<int> move) {
+    std::vector<std::string> table = {
+        "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+        "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+        "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+        "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+        "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+        "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+        "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+    };
+    return table[move[0]]
+}
+
+int check(std::vector<std::vector<int>> board) {
+    // if white is checking black: 1
+    // if black is checking white: -1
+    // if somehow both kings are under check: 2
+    // if nobody is under check: 0
+
+    int wking_index = 0;
+    int bking_index = 0;
+    for (int square = 0; square < 64; ++square) {
+        if (board[5][square] == 1) {
+            wking_index = square;
+            break;
+        }
+    }
+    for (int square = 0; square < 64; ++square) {
+        if (board[11][square] == 1) {
+            bking_index = square;
+            break;
+        }
+    }
+    if (!threatened(board, wking_index, true) && !threatened(board, bking_index, false))
+        return 0;
+    if (threatened(board, wking_index, true) && threatened(board, bking_index, false))
+        return 2;
+    if (threatened(board, wking_index, true))
+        return -1;
+    if (threatened(board, bking_index, false))
+        return 1;
+}
+
+// check if a square is being threatened by the enemy
+bool threatened(std::vector<std::vector<int>> board, int index, bool white_player) {
+    if (white_player) {
+        for (int piece = 6; piece < 12; ++piece) {
+            for (int square = 0; square < 64; ++square) {
+                if (board[piece][square] == 1) {
+                    int old = board[0][index];
+                    board[0][index] = 1; // to test if pawns threaten it
+                    if (check_move(board, piece % 6, {square, index}, false, true))
+                        return true;
+                    else
+                        board[0][index] = old;
+                }
+            }
+        }
+    } else {
+        for (int piece = 0; piece < 6; ++piece) {
+            for (int square = 0; square < 64; ++square) {
+                if (board[piece][square] == 1) {
+                    int old = board[6][index];
+                    board[6][index] = 1; // to test if pawns threaten it
+                    if (check_move(board, piece % 6, {square, index}, false, true))
+                        return true;
+                    else
+                        board[6][index] = old;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 // returns list of legal moves
 std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, bool white_turn) {
     std::vector<std::vector<int>> moves; // list of legal moves
@@ -27,7 +104,7 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
     }
     if (white_turn) {
         for (int piece = 0; piece < 6; ++piece) {
-            for (int i = 0; i < 64; ++i) { // look for piece to move
+            for (int i = 0; i < 64; ++i) { // look for a piece to move
                 if (board[piece][i] == 1) { // a piece is selected
                     for (int dest = 0; dest < 64; ++dest) { // look for legal places to move it to
                         if (check_move(board, piece, {i, dest}))
@@ -38,7 +115,7 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
         }
     } else {
         for (int piece = 0; piece < 6; ++piece) {
-            for (int i = 0; i < 64; ++i) { // look for piece to move
+            for (int i = 0; i < 64; ++i) { // look for a piece to move
                 if (board[piece + 6][i] == 1) { // a piece is selected
                     for (int dest = 0; dest < 64; ++dest) { // look for legal places to move it to
                         if (check_move(board, piece, {i, dest}))
@@ -118,7 +195,7 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
                 }
             }
         } else {
-            if (check(make_move(board, move, false)) == 3) {
+            if (check(make_move(board, move, false)) == 2) {
                 // std::cout << "check_move: \"I won, but at what cost\" ahhh move" << std::endl;
                 return false;
             }
