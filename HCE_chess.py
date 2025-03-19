@@ -238,7 +238,7 @@ def check_move(board, piece, move, check_king = True):
         opponent_index = 0
 
     if occupied[self_index][destination] == 1:
-        # print(f"check_move: position is already occupied by own piece")
+        # print("check_move: position is already occupied by own piece")
         return False
     
     if check_king:
