@@ -158,43 +158,25 @@ def threatened(board, index, white_player):
 
 # returns list of legal moves
 def legal_moves(board, white_turn):
+    moves = [] # list of legal moves
     if check(board) == 2 or check(board) == -2:
         # print("legal_moves: game is over")
         return []
-    occupied = [] # if 1 then the space is occupied by a piece
-    for i in range(len(board[0])):
-        if (board[0][i] + board[1][i] + board[2][i] + board[3][i] + board[4][i] + board[5][i] + board[6][i] + board[7][i] + board[8][i] + board[9][i] + board[10][i] + board[11][i]) > 0:
-            occupied.append(1)
-        else:
-            occupied.append(0)
-
     if white_turn:
-        moves = [] # list of legal moves
         for piece in range(6):
             for i in range(len(board[piece])): # look for pieces to move
                 if board[piece][i] == 1: # once a piece is selected, look for legal places to move it to
-                    # print("debug: found a piece to move")
                     for dest in range(len(board[piece])): # you could technically replace 'piece' with '0'
-                        # print("debug: looking for places to move it to")
                         if check_move(board, piece, [i, dest]):
-                            # print("debug: successfully found a place")
                             moves.append([i, dest])
-                            # print(f"debug: moves list so far = {moves}")
-        # if len(moves) == 0:
-            # print("legal_moves: stalemate")
-        return moves
     else: # remember to edit any 'piece' indices when it's black's turn
-        moves = [] # list of legal moves
         for piece in range(6):
             for i in range(len(board[piece + 6])): # look for pieces to move
                 if board[piece + 6][i] == 1: # once a piece is selected, look for legal places to move it to
                     for dest in range(len(board[piece + 6])): # you could technically replace 'piece' with '0'
                         if check_move(board, piece, [i, dest]):
-                            # print("debug: successfully found a place")
                             moves.append([i, dest])
-        # if len(moves) == 0:
-            # print("legal_moves: stalemate")
-        return moves
+    return moves
 
 # check if a move is legal
 # remember to also make it check if the king is under check
@@ -525,14 +507,16 @@ while True: # game loop
     print()
     if white_turn:
         start_time = time.time()
-        # move = search(4, board, 2, white_turn)
-        move = [int(num) for num in input("Enter input: ").split()]
+        move = search(4, board, 2, white_turn)
+        # move = [int(num) for num in input("Enter input: ").split()]
         print(f"elapsed time = {time.time() - start_time}")
     else:
         start_time = time.time()
-        # move = search(4, board, 2, white_turn)
-        move = [int(num) for num in input("Enter input: ").split()]
+        move = search(4, board, 2, white_turn)
+        # move = [int(num) for num in input("Enter input: ").split()]
         print(f"elapsed time = {time.time() - start_time}")
+    if len(move) == 0:
+        break
     print(f"move = {move}")
     print(f"move = {notation_conv(move)}")
     if len(move) == 0:
