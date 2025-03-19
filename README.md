@@ -1,7 +1,10 @@
 # doodad
 lil shit chess engine.
 
-it's not uci compatible yet but it will be I promise.
-it is currently coded in python but I'm slowly converting it to c++ due to peer pressure from the sf discord.
-I will also implement iterative deepening, castling, and en passant in the future.
-my movegen is perfectly fine shut up.
+This is my first ever chess engine, and it was originally coded in Python. I'm slowly converting it to C++ due to peer pressure from the Stockfish dc.
+
+It's not UCI compatible yet but it will be eventually.
+
+I also plan to implement somewhat important chess features such as castling and en passant in the future, as well as iterative deepening.
+
+BTW, my movegen is perfectly fine, shut up.
