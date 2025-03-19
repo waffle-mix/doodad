@@ -164,14 +164,14 @@ def legal_moves(board, white_turn):
         return moves
     if white_turn:
         for piece in range(6):
-            for i in range(len(board[piece])): # look for pieces to move
+            for i in range(len(board[piece])): # look for a piece to move
                 if board[piece][i] == 1: # a piece is selected
                     for dest in range(len(board[piece])): # look for legal places to move it to
                         if check_move(board, piece, [i, dest]):
                             moves.append([i, dest])
     else: # remember to edit any 'piece' indices when it's black's turn
         for piece in range(6):
-            for i in range(len(board[piece + 6])): # look for pieces to move
+            for i in range(len(board[piece + 6])): # look for a piece to move
                 if board[piece + 6][i] == 1: # a piece is selected
                     for dest in range(len(board[piece + 6])): # look for legal places to move it to
                         if check_move(board, piece, [i, dest]):
