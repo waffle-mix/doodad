@@ -16,7 +16,7 @@ def engine():
         if command == "quit":
             return
         elif command == "uci":
-            print("id name Slowpoke 1.0")
+            print("id name doodad 1.0")
             print("id author Waffle_Mix")
             print("uciok")
         elif command == "isready":
@@ -381,7 +381,7 @@ def make_move(board, move, c_move = True):
         # print("make_move: start square is empty")
         return board
     if c_move:
-        if check_move(board, piece % 6, move) == False: # check move doesn't recognize piece numbers > 5
+        if check_move(board, piece % 6, move) == False: # check_move doesn't recognize piece numbers > 5
             # print("make_move: check_move returned False")
             return board
     new_board = copy.deepcopy(board) # to prevent it from modifying the original board data >:(
