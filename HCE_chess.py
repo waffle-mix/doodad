@@ -141,7 +141,7 @@ def threatened(board, index, white_player):
             for square in range(len(board[piece])):
                 if board[piece][square] == 1:
                     new_board[0][index] = 1 # to test if pawns threaten it
-                    if check_move(new_board, piece % 6, [square, index], False):
+                    if check_move(new_board, piece % 6, [square, index], False, True):
                         return True
                     else:
                         new_board[0][index] = board[0][index]
@@ -150,7 +150,7 @@ def threatened(board, index, white_player):
             for square in range(len(board[piece])):
                 if board[piece][square] == 1:
                     new_board[6][index] = 1 # to test if pawns threaten it
-                    if check_move(new_board, piece % 6, [square, index], False):
+                    if check_move(new_board, piece % 6, [square, index], False, True):
                         return True
                     else:
                         new_board[6][index] = board[6][index]
@@ -198,7 +198,7 @@ def legal_moves(board, white_turn):
 
 # check if a move is legal
 # remember to also make it check if the king is under check
-def check_move(board, piece, move, check_king = True):
+def check_move(board, piece, move, check_king = True, ignore_own = False):
     start = move[0]
     destination = move[1]
 
@@ -237,22 +237,33 @@ def check_move(board, piece, move, check_king = True):
         self_index = 1
         opponent_index = 0
 
-    if occupied[self_index][destination] == 1:
-        # print("check_move: position is already occupied by own piece")
-        return False
+    if ignore_own == False: # so that protecting pieces from king capture works
+        if occupied[self_index][destination] == 1:
+            # print("check_move: position is already occupied by own piece")
+            return False
     
     if check_king:
-        if check(make_move(board, move, False)) == 3:
-            # print("check_move: \"I won, but at what cost\" ahhh move")
-            return False
-        if self_index == 0: # player is white
-            if check(make_move(board, move, False)) == -1:
-                # print("check_move: white king is under check")
+        if piece == 5: # might help speed up some stuff
+            if self_index == 0: # white
+                if threatened(board, destination, True):
+                    # print("check_move: white king cannot move into a check")
+                    return False
+            else: # black
+                if threatened(board, destination, False):
+                    # print("check_move: black king cannot move into a check")
+                    return False
+        else:
+            if check(make_move(board, move, False)) == 3:
+                # print("check_move: \"I won, but at what cost\" ahhh move")
                 return False
-        elif self_index == 1: # player is black
-            if check(make_move(board, move, False)) == 1:
-                # print("check_move: black king is under check")
-                return False
+            if self_index == 0: # player is white
+                if check(make_move(board, move, False)) == -1:
+                    # print("check_move: white king is under check")
+                    return False
+            elif self_index == 1: # player is black
+                if check(make_move(board, move, False)) == 1:
+                    # print("check_move: black king is under check")
+                    return False
 
     start_row = int(start / 8)
     start_col = start % 8
@@ -519,8 +530,8 @@ while True: # game loop
         print(f"elapsed time = {time.time() - start_time}")
     else:
         start_time = time.time()
-        move = search(4, board, 2, white_turn)
-        # move = [int(num) for num in input("Enter input: ").split()]
+        # move = search(4, board, 2, white_turn)
+        move = [int(num) for num in input("Enter input: ").split()]
         print(f"elapsed time = {time.time() - start_time}")
     print(f"move = {move}")
     print(f"move = {notation_conv(move)}")
