@@ -18,9 +18,19 @@
     return 0.1;
 } */
 
+// returns list of legal moves
+std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, bool white_turn) {
+    std::vector<std::vector<int>> moves;
+    if (check(board) == 2 || check(board) == -2) {
+        // std::cout << "legal_moves: game is over" << std::endl;
+        return moves;
+    }
+    std::vector<std::vector<int>> occupied; // if 1 then the 
+}
+
 // check if a move is legal
 // remember to also make it check if the king is under check
-bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king = true) {
+bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king = true, bool ignore_own = false) {
     int start = move[0];
     int destination = move[1];
 
@@ -64,25 +74,41 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
         opponent_index = 0;
     }
 
-    if (occupied[self_index][destination] == 1) {
-        // std::cout << "check_move: position is already occupied by own piece" << std::endl;
-        return false;
+    if (ignore_own == false) {
+        if (occupied[self_index][destination] == 1) {
+            // std::cout << "check_move: position is already occupied by own piece" << std::endl;
+            return false;
+        }
     }
 
     if (check_king) {
-        if (check(make_move(board, move, false)) == 3) {
-            // std::cout << "check_move: \"I won, but at what cost\" ahhh move" << std::endl;
-            return false;
-        }
-        if (self_index == 0) { // player is white
-            if (check(make_move(board, move, false)) == -1) {
-                // std::cout << "check_move: white king is under check" << std::endl;
-                return false;
+        if (piece == 5) { // might help speed up some stuff
+            if (self_index == 0) { // white
+                if (threatened(board, destination, true)) {
+                    // std::cout << "check_move: white king cannot move into a check" << std::endl;
+                    return false;
+                }
+            } else {
+                if (threatened(board, destination, false)) {
+                    // std::cout << "check_move: black king cannot move into a check" << std::endl;
+                    return false;
+                }
             }
         } else {
-            if (check(make_move(board, move, false)) == 1) {
-                // std::cout << "check_move: black king is under check" << std::endl;
+            if (check(make_move(board, move, false)) == 3) {
+                // std::cout << "check_move: \"I won, but at what cost\" ahhh move" << std::endl;
                 return false;
+            }
+            if (self_index == 0) { // player is white
+                if (check(make_move(board, move, false)) == -1) {
+                    // std::cout << "check_move: white king is under check" << std::endl;
+                    return false;
+                }
+            } else {
+                if (check(make_move(board, move, false)) == 1) {
+                    // std::cout << "check_move: black king is under check" << std::endl;
+                    return false;
+                }
             }
         }
     }
@@ -193,7 +219,42 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
         }
         return true;
     } else if (piece == 4) {
-        ;
+        if (start_row == dest_row) {
+            for (int i = start + interval; i < destination; i += interval) {
+                if (occupied[0][i] == 1 or occupied[1][i] == 1) {
+                    // std::cout << "check_move: queen cannot move through other pieces" << std::endl;
+                    return false;
+                }
+            }
+        } else if (start_col == dest_col) {
+            for (int i = start + interval; i < destination; i += interval) { // interval uses row_diff here
+                if (occupied[0][i] == 1 || occupied[1][i] == 1) {
+                    // std::cout << "check_move: queen cannot move through other pieces" << std::endl;
+                    return false;
+                }
+            }
+        } else if (row_diff == col_diff) {
+            for (int i = start + interval; i < destination; i += interval) {
+                if (occupied[0][i] == 1 || occupied[1][i] == 1) {
+                    // std::cout << "check_move: queen cannot move through other pieces" << std::endl;
+                    return false;
+                }
+            }
+        } else {
+            // std::cout << "check_move: not a valid queen move" << std::endl;
+            return false;
+        }
+        return true;
+    } else if (piece == 5) {
+        if (row_diff <= 1 && col_diff <= 1)
+            return true; // check_move already checks if the destination square is threatened before this line of code
+        else {
+            // std::cout << "check_move: not a valid king move" << std::endl;
+            return false;
+        }
+    } else {
+        std::cout << "check_move: piece type " << piece << " is invalid" << std::endl;
+        return false;
     }
 }
 
@@ -212,12 +273,12 @@ std::vector<std::vector<int>> make_move(std::vector<std::vector<int>> board, std
         // std::cout << "make_move: start square is empty" << std::endl;
         return board;
     }
-    /* if (c_move) {
+    if (c_move) {
         if (!check_move(board, piece % 6, move)) { // check_move doesn't recognize pieces numbers > 5
             // std::cout << "make_move: check_move returned False" << std::endl;
             return board;
         }
-    } */
+    }
     board[piece][move[0]] = 0;
     for (int piece_type = 0; piece_type < board.size(); ++piece_type)
         board[piece_type][move[1]] = 0; // remove (capture) any enemy pieces
