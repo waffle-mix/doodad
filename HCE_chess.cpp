@@ -4,17 +4,75 @@
 #include <string>
 #include <cmath>
 
-#define PAWN_VALUE = 1
-#define BISHOP_VALUE = 3
-#define KNIGHT_VALUE = 3
-#define ROOK_VALUE = 5
-#define QUEEN_VALUE = 9
-#define CHECK_BIAS = 12
+#define PAWN_VALUE 1
+#define BISHOP_VALUE 3
+#define KNIGHT_VALUE 3
+#define ROOK_VALUE 5
+#define QUEEN_VALUE 9
+#define CHECK_BIAS 12
 
-/* float evaluate(std::vector<std::vector<int>> board) {
-    float white_score = count_ones(board[0]);
-    return 0.1;
-} */
+int count_ones(std::vector<int> bitboard);
+int check(std::vector<std::vector<int>> board);
+std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, bool white_turn);
+std::vector<std::vector<int>> make_move(std::vector<std::vector<int>> board, std::vector<int> move, bool c_move = true);
+bool threatened(std::vector<std::vector<int>> board, int index, bool white_player);
+bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king = true, bool ignore_own = false);
+
+float evaluate(std::vector<std::vector<int>> board) {
+    float white_score = count_ones(board[0]) * PAWN_VALUE + count_ones(board[1]) * BISHOP_VALUE + count_ones(board[2]) * KNIGHT_VALUE + count_ones(board[3]) * ROOK_VALUE + count_ones(board[4]) * QUEEN_VALUE;
+    float black_score = count_ones(board[6]) * PAWN_VALUE + count_ones(board[7]) * BISHOP_VALUE + count_ones(board[8]) * KNIGHT_VALUE + count_ones(board[9]) * ROOK_VALUE + count_ones(board[10]) * QUEEN_VALUE;
+    return (white_score - black_score + check(board) * CHECK_BIAS);
+}
+
+float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha, float beta, bool white_player) {
+    float best_eval = INT_MIN;  
+    if (depth <= 0) {
+        if (white_player)
+            return evaluate(board);
+        else
+            return -evaluate(board);
+    }
+    std::vector<std::vector<int>> moves = legal_moves(board, white_player);
+    if (moves.size() == 0) {
+        if (check(board) == 0)
+            return 0; // stalemate
+        return best_eval; // checkmate
+    }
+    for (std::vector<int> move : moves) {
+        float eval = -negamax_depth(make_move(board, move), depth - 1, -beta, -alpha, !white_player);
+        if (eval > best_eval)
+            best_eval = eval;
+        alpha = std::fmax(alpha, best_eval);
+        if (alpha >= beta)
+            break;
+    }
+    return best_eval;
+}
+
+std::vector<int> search(int algorithm, std::vector<std::vector<int>> board, int limit, bool white_player) {
+    std::vector<int> best_move;
+    
+    if (algorithm == 4) {
+        if (limit <= 0)
+            return best_move;
+        std::vector<std::vector<int>> moves = legal_moves(board, white_player);
+        if (moves.size() == 0) { // game is over
+            return best_move;
+        }
+        float best_eval = INT_MIN;
+        for (std::vector<int> move : moves) {
+            float eval = -negamax_depth(make_move(board, move), limit - 1, INT_MIN, INT_MAX, !white_player);
+            if (eval > best_eval) {
+                best_move = move;
+                best_eval = eval;
+            }
+        }
+    }
+    return best_move;
+}
+
+// convert a FEN string to board state
+// std::vector<std::vector<int>> fen_conv(std::string fen)
 
 // convert move data in index form to a long algebraic notation string
 std::string notation_conv(std::vector<int> move) {
@@ -27,7 +85,7 @@ std::string notation_conv(std::vector<int> move) {
         "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
         "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
         "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"};
-    return table[move[0]] + table[move[1]];
+    return (table[move[0]] + table[move[1]]);
 }
 
 int check(std::vector<std::vector<int>> board) {
@@ -58,6 +116,7 @@ int check(std::vector<std::vector<int>> board) {
         return -1;
     if (threatened(board, bking_index, false))
         return 1;
+    return 0;
 }
 
 // check if a square is being threatened by the enemy
@@ -127,7 +186,7 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
 
 // check if a move is legal
 // remember to also make it check if the king is under check
-bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king = true, bool ignore_own = false) {
+bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king, bool ignore_own) {
     int start = move[0];
     int destination = move[1];
 
@@ -350,12 +409,14 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
             return false;
         }
     } else {
-        std::cout << "check_move: piece type " << piece << " is invalid" << std::endl;
+        // std::cout << "check_move: piece type " << piece << " is invalid" << std::endl;
         return false;
     }
+    // std::cout << "check_move: reached end of function" << std::endl;
+    return false;
 }
 
-std::vector<std::vector<int>> make_move(std::vector<std::vector<int>> board, std::vector<int> move, bool c_move = true) {
+std::vector<std::vector<int>> make_move(std::vector<std::vector<int>> board, std::vector<int> move, bool c_move) {
     int piece = -1;
     for (int piece_type = 0; piece_type < board.size(); ++piece_type) {
         if ((board[piece_type][move[0]]) == 1) { // this condition shouldn't ever be True more than once
