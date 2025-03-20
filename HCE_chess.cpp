@@ -685,6 +685,7 @@ std::vector<int> get_move() {
 int main() {
     std::vector<std::vector<int>> board = new_board();
     bool white_turn = true;
+    bool white_player = true;
 
     // board = make_move(board, {52, 36});
     // move_debug(board, true);
@@ -696,17 +697,28 @@ int main() {
     print_board(board);
     return 0; */
 
+    std::cout << "white or black (enter w or b): ";
+    std::string player;
+    std::cin >> player;
+    if (player == "b")
+        white_player = false;
+
     while (true) { // testing game loop
         print_board(board);
         std::cout << std::endl;
         std::vector<int> move;
         std::time_t start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         if (white_turn) {
-            // move = search(4, board, 2, white_turn);
-            move = get_move();
+            if (white_player)
+                move = get_move();
+            else
+                move = search(4, board, 2, white_turn);
             // move = {52, 36};
         } else {
-            move = search(4, board, 2, white_turn);
+            if (white_player)
+                move = search(4, board, 2, white_turn);
+            else
+                move = get_move();
             // move = {11, 27};
         }
         std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
