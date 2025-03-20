@@ -192,7 +192,7 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
 std::vector<int> piece_moves(int piece, int index) {
     std::vector<int> dests;
     if (piece == 0) {
-        dests = {index - 8, index - 16, index - 9, index - 7, index + 8, index + 16, index + 7, index + 9};
+        dests = {index - 16, index - 9, index - 8, index - 7, index + 7, index + 8, index + 9, index + 16};
     } else if (piece == 1) {
         int nw = std::min(index % 8, (int)(index / 8));
         int ne = std::min(7 - (index % 8), (int)(index / 8));
@@ -679,9 +679,9 @@ int main() {
     // move_debug(board, true);
 
     /* board = blank_board();
-    std::vector<int> dests = piece_moves(4, 19);
+    std::vector<int> dests = piece_moves(0, 35);
     for (int dest : dests)
-        board[4][dest] = 1;
+        board[0][dest] = 1;
     print_board(board);
     return 0; */
 
@@ -691,10 +691,10 @@ int main() {
         std::vector<int> move;
         std::time_t start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         if (white_turn) {
-            move = search(4, board, 3, white_turn);
+            move = search(4, board, 2, white_turn);
             // move = {52, 36};
         } else {
-            move = search(4, board, 3, white_turn);
+            move = search(4, board, 2, white_turn);
             // move = {11, 27};
         }
         std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
