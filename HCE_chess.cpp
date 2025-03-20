@@ -11,8 +11,6 @@
 #define QUEEN_VALUE = 9
 #define CHECK_BIAS = 12
 
-
-
 /* float evaluate(std::vector<std::vector<int>> board) {
     float white_score = count_ones(board[0]);
     return 0.1;
@@ -28,9 +26,8 @@ std::string notation_conv(std::vector<int> move) {
         "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
         "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
         "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
-    };
-    return table[move[0]]
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"};
+    return table[move[0]] + table[move[1]];
 }
 
 int check(std::vector<std::vector<int>> board) {
@@ -532,9 +529,5 @@ int get_piece(std::vector<std::vector<int>> board, int index) {
 }
 
 int main() {
-    std::vector<std::vector<int>> board = new_board();
-    print_board(board);
-    board = make_move(board, {52, 36});
-    print_board(board);
-    return 0;
+    std::cout << notation_conv({52, 36}) << std::endl;
 }
