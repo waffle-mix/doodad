@@ -339,7 +339,7 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
         }
     } else if (piece == 1) {
         if (row_diff == col_diff) {
-            for (int i = start + interval; i < destination; i += interval) {
+            for (int i = start + interval; i != destination; i += interval) {
                 if (occupied[0][i] == 1 || occupied[1][i] == 1) {
                     // std::cout << "check_move: bishop cannot move through other pieces" << std::endl;
                     return false;
@@ -359,14 +359,14 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
         return false;
     } else if (piece == 3) {
         if (start_row == dest_row) {
-            for (int i = start + interval; i < destination; i += interval) {
+            for (int i = start + interval; i != destination; i += interval) {
                 if (occupied[0][i] == 1 || occupied[1][i] == 1) {
                     // std::cout << "check_move: rook cannot move through other pieces" << std::endl;
                     return false;
                 }
             }
         } else if (start_col == dest_col) {
-            for (int i = start + interval; i < destination; i += interval) { // interval uses row_diff here
+            for (int i = start + interval; i != destination; i += interval) { // interval uses row_diff here
                 if (occupied[0][i] == 1 || occupied[1][i] == 1) {
                     // std::cout << "check_move: rook cannot move through other pieces" << std::endl;
                     return false;
@@ -379,21 +379,21 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
         return true;
     } else if (piece == 4) {
         if (start_row == dest_row) {
-            for (int i = start + interval; i < destination; i += interval) {
+            for (int i = start + interval; i != destination; i += interval) {
                 if (occupied[0][i] == 1 or occupied[1][i] == 1) {
                     // std::cout << "check_move: queen cannot move through other pieces" << std::endl;
                     return false;
                 }
             }
         } else if (start_col == dest_col) {
-            for (int i = start + interval; i < destination; i += interval) { // interval uses row_diff here
+            for (int i = start + interval; i != destination; i += interval) { // interval uses row_diff here
                 if (occupied[0][i] == 1 || occupied[1][i] == 1) {
                     // std::cout << "check_move: queen cannot move through other pieces" << std::endl;
                     return false;
                 }
             }
         } else if (row_diff == col_diff) {
-            for (int i = start + interval; i < destination; i += interval) {
+            for (int i = start + interval; i != destination; i += interval) {
                 if (occupied[0][i] == 1 || occupied[1][i] == 1) {
                     // std::cout << "check_move: queen cannot move through other pieces" << std::endl;
                     return false;
@@ -596,28 +596,30 @@ int main() {
     std::vector<std::vector<int>> board = new_board();
     bool white_turn = true;
 
-    std::vector<std::vector<int>> moves = legal_moves(board, true);
+    /* std::vector<std::vector<int>> moves = legal_moves(board, true);
     for (std::vector<int> move : moves) {
-        std::cout << id_piece(move[0]) << " from " << move[0] << " to " << move[1] << std::endl;
+        std::cout << id_piece(get_piece(board, move[0])) << " from " << move[0] << " to " << move[1] << std::endl;
     }
-    return 0;
+    return 0; */
 
-    while (white_turn) { // testing game loop
+    while (true) { // testing game loop
         print_board(board);
         std::cout << std::endl;
         std::vector<int> move;
         std::time_t start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         if (white_turn) {
-            // move = search(4, board, 2, white_turn);
-            board = make_move(board, {52, 36});
+            move = search(4, board, 2, white_turn);
+            // move = {52, 36};
         } else {
-            // move = search(4, board, 2, white_turn);
-            board = make_move(board, {27, 11});
+            move = search(4, board, 2, white_turn);
+            // move = {11, 27};
         }
         std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::cout << "elapsed time: " << (finish_time - start_time) << std::endl;
-        if (move.size() == 0)
+        if (move.size() == 0) {
+            std::cout << "breaking" << std::endl;
             break;
+        }
         int piece = get_piece(board, move[0]);
         if (!check_move(board, piece % 6, move)) {
             std::cout << "check_move returned False. try again." << std::endl;
