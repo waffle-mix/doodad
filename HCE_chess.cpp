@@ -616,10 +616,8 @@ int main() {
         }
         std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::cout << "elapsed time: " << (finish_time - start_time) << std::endl;
-        if (move.size() == 0) {
-            std::cout << "breaking" << std::endl;
+        if (move.size() == 0)
             break;
-        }
         int piece = get_piece(board, move[0]);
         if (!check_move(board, piece % 6, move)) {
             std::cout << "check_move returned False. try again." << std::endl;
