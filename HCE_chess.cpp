@@ -737,4 +737,7 @@ int main() {
         white_turn = !white_turn;
     }
     std::cout << "GAME OVER" << std::endl;
+    std::string tmp;
+    std::cout << "press Enter to quit: ";
+    std::cin >> tmp;
 }
