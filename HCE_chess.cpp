@@ -671,6 +671,17 @@ void move_debug(std::vector<std::vector<int>> board, bool white_player) {
     }
 }
 
+// get move input from user
+std::vector<int> get_move() {
+    int start;
+    int dest;
+    std::cout << ": ";
+    std::cin >> start;
+    std::cout << ": ";
+    std::cin >> dest;
+    return {start, dest};
+}
+
 int main() {
     std::vector<std::vector<int>> board = new_board();
     bool white_turn = true;
@@ -691,17 +702,18 @@ int main() {
         std::vector<int> move;
         std::time_t start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         if (white_turn) {
-            move = search(4, board, 2, white_turn);
+            // move = search(4, board, 2, white_turn);
+            move = get_move();
             // move = {52, 36};
         } else {
             move = search(4, board, 2, white_turn);
             // move = {11, 27};
         }
         std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        std::cout << "elapsed time: " << (finish_time - start_time) << std::endl;
-        std::cout << "move: " << notation_conv(move) << std::endl;
         if (move.size() == 0)
             break;
+        std::cout << "elapsed time: " << (finish_time - start_time) << std::endl;
+        std::cout << "move: " << notation_conv(move) << std::endl;
         int piece = get_piece(board, move[0]);
         if (!check_move(board, piece % 6, move)) {
             std::cout << "check_move returned False. try again." << std::endl;
