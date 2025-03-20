@@ -25,6 +25,7 @@ float evaluate(std::vector<std::vector<int>> board) {
 }
 
 float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha, float beta, bool white_player) {
+    // std::cout << "negamax_depth: " << depth << std::endl;
     float best_eval = INT_MIN;  
     if (depth <= 0) {
         if (white_player)
@@ -193,7 +194,9 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
     if (piece > 5 && piece < 12)
         std::cout << "check_move: piece index is above 5, which will result in check_move automatically returning False" << std::endl;
     
-    std::vector<std::vector<int>> occupied; // it's not stupid if it works
+    std::vector<int> white_occupied;
+    std::vector<int> black_occupied;
+    std::vector<std::vector<int>> occupied = {white_occupied, black_occupied}; // it's not stupid if it works
     for (int i = 0; i < board[0].size(); ++i) {
         if ((board[0][i] + board[1][i] + board[2][i] + board[3][i] + board[4][i] + board[5][i]) > 0)
             occupied[0].push_back(1);
@@ -590,5 +593,40 @@ int get_piece(std::vector<std::vector<int>> board, int index) {
 }
 
 int main() {
-    std::cout << notation_conv({52, 36}) << std::endl;
+    std::vector<std::vector<int>> board = new_board();
+    bool white_turn = true;
+
+    std::vector<std::vector<int>> moves = legal_moves(board, true);
+    for (std::vector<int> move : moves) {
+        std::cout << id_piece(move[0]) << " from " << move[0] << " to " << move[1] << std::endl;
+    }
+    return 0;
+
+    while (white_turn) { // testing game loop
+        print_board(board);
+        std::cout << std::endl;
+        std::vector<int> move;
+        std::time_t start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        if (white_turn) {
+            // move = search(4, board, 2, white_turn);
+            board = make_move(board, {52, 36});
+        } else {
+            // move = search(4, board, 2, white_turn);
+            board = make_move(board, {27, 11});
+        }
+        std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::cout << "elapsed time: " << (finish_time - start_time) << std::endl;
+        if (move.size() == 0)
+            break;
+        int piece = get_piece(board, move[0]);
+        if (!check_move(board, piece % 6, move)) {
+            std::cout << "check_move returned False. try again." << std::endl;
+            continue;
+        }
+        board = make_move(board, move);
+        std::cout << "eval: " << evaluate(board) << std::endl;
+        std::cout << "check: " << check(board) << std::endl;
+        white_turn = !white_turn;
+    }
+    std::cout << "GAME OVER" << std::endl;
 }
