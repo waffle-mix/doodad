@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <algorithm>
 
 #define PAWN_VALUE 1
 #define BISHOP_VALUE 3
@@ -17,6 +18,7 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
 std::vector<std::vector<int>> make_move(std::vector<std::vector<int>> board, std::vector<int> move, bool c_move = true);
 bool threatened(std::vector<std::vector<int>> board, int index, bool white_player);
 bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king = true, bool ignore_own = false);
+std::vector<int> piece_moves(int piece, int index);
 
 float evaluate(std::vector<std::vector<int>> board) {
     float white_score = count_ones(board[0]) * PAWN_VALUE + count_ones(board[1]) * BISHOP_VALUE + count_ones(board[2]) * KNIGHT_VALUE + count_ones(board[3]) * ROOK_VALUE + count_ones(board[4]) * QUEEN_VALUE;
@@ -25,7 +27,6 @@ float evaluate(std::vector<std::vector<int>> board) {
 }
 
 float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha, float beta, bool white_player) {
-    // std::cout << "negamax_depth: " << depth << std::endl;
     float best_eval = INT_MIN;  
     if (depth <= 0) {
         if (white_player)
@@ -40,7 +41,7 @@ float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha,
         return best_eval; // checkmate
     }
     for (std::vector<int> move : moves) {
-        float eval = -negamax_depth(make_move(board, move), depth - 1, -beta, -alpha, !white_player);
+        float eval = -negamax_depth(make_move(board, move, false), depth - 1, -beta, -alpha, !white_player);
         if (eval > best_eval)
             best_eval = eval;
         alpha = std::fmax(alpha, best_eval);
@@ -62,7 +63,7 @@ std::vector<int> search(int algorithm, std::vector<std::vector<int>> board, int 
         }
         float best_eval = INT_MIN;
         for (std::vector<int> move : moves) {
-            float eval = -negamax_depth(make_move(board, move), limit - 1, INT_MIN, INT_MAX, !white_player);
+            float eval = -negamax_depth(make_move(board, move, false), limit - 1, INT_MIN, INT_MAX, !white_player);
             if (eval > best_eval) {
                 best_move = move;
                 best_eval = eval;
@@ -163,7 +164,8 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
         for (int piece = 0; piece < 6; ++piece) {
             for (int i = 0; i < 64; ++i) { // look for a piece to move
                 if (board[piece][i] == 1) { // a piece is selected
-                    for (int dest = 0; dest < 64; ++dest) { // look for legal places to move it to
+                    std::vector<int> dests = piece_moves(piece, i);
+                    for (int dest : dests) {
                         if (check_move(board, piece, {i, dest}))
                             moves.push_back({i, dest});
                     }
@@ -174,7 +176,8 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
         for (int piece = 0; piece < 6; ++piece) {
             for (int i = 0; i < 64; ++i) { // look for a piece to move
                 if (board[piece + 6][i] == 1) { // a piece is selected
-                    for (int dest = 0; dest < 64; ++dest) { // look for legal places to move it to
+                    std::vector<int> dests = piece_moves(piece, i);
+                    for (int dest : dests) {
                         if (check_move(board, piece, {i, dest}))
                             moves.push_back({i, dest});
                     }
@@ -183,6 +186,75 @@ std::vector<std::vector<int>> legal_moves(std::vector<std::vector<int>> board, b
         }
     }
     return moves;
+}
+
+// returns list of potentially legal piece destinations. this will prevent check_move from being called unnecessarily
+std::vector<int> piece_moves(int piece, int index) {
+    std::vector<int> dests;
+    if (piece == 0) {
+        dests = {index - 8, index - 16, index - 9, index - 7, index + 8, index + 16, index + 7, index + 9};
+    } else if (piece == 1) {
+        int nw = std::min(index % 8, (int)(index / 8));
+        int ne = std::min(7 - (index % 8), (int)(index / 8));
+        int sw = std::min(index % 8, 7 - (int)(index / 8));
+        int se = std::min(7 - (index % 8), 7 - (int)(index / 8));
+        for (int i = 1; i <= nw; ++i)
+            dests.push_back(index - 9 * i);
+        for (int i = 1; i <= ne; ++i)
+            dests.push_back(index - 7 * i);
+        for (int i = 1; i <= sw; ++i)
+            dests.push_back(index + 7 * i);
+        for (int i = 1; i <= se; ++i)
+            dests.push_back(index + 9 * i);
+    } else if (piece == 2) {
+        dests = {index - 17, index - 15, index - 10, index - 6, index + 6, index + 10, index + 15, index + 17};
+        return dests;
+    } else if (piece == 3) {
+        int n = (int)(index / 8);
+        int e = 7 - (index % 8);
+        int s = 7 - (int)(index / 8);
+        int w = index % 8;
+        for (int i = 1; i <= n; ++ i)
+            dests.push_back(index - 8 * i);
+        for (int i = 1; i <= e; ++ i)
+            dests.push_back(index + i);
+        for (int i = 1; i <= s; ++ i)
+            dests.push_back(index + 8 * i);
+        for (int i = 1; i <= w; ++ i)
+            dests.push_back(index - i);
+    } else if (piece == 4) {
+        int n = (int)(index / 8);
+        int e = 7 - (index % 8);
+        int s = 7 - (int)(index / 8);
+        int w = index % 8;
+        int nw = std::min(n, w);
+        int ne = std::min(n, e);
+        int sw = std::min(s, w);
+        int se = std::min(s, e);
+        for (int i = 1; i <= n; ++ i)
+            dests.push_back(index - 8 * i);
+        for (int i = 1; i <= e; ++ i)
+            dests.push_back(index + i);
+        for (int i = 1; i <= s; ++ i)
+            dests.push_back(index + 8 * i);
+        for (int i = 1; i <= w; ++ i)
+            dests.push_back(index - i);
+        for (int i = 1; i <= nw; ++i)
+            dests.push_back(index - 9 * i);
+        for (int i = 1; i <= ne; ++i)
+            dests.push_back(index - 7 * i);
+        for (int i = 1; i <= sw; ++i)
+            dests.push_back(index + 7 * i);
+        for (int i = 1; i <= se; ++i)
+            dests.push_back(index + 9 * i);
+    } else if (piece == 5) {
+        dests = {index - 9, index - 8, index - 7, index - 1, index + 1, index + 7, index + 8, index + 9};
+    } else {
+        std::cout << "piece_moves: piece index is above 5, which will result in piece_moves automatically returning all squares" << std::endl;
+        for (int i = 0; i < 64; )
+            dests.push_back(i);
+    }
+    return dests;
 }
 
 // check if a move is legal
@@ -592,14 +664,25 @@ int get_piece(std::vector<std::vector<int>> board, int index) {
     return piece;
 }
 
+void move_debug(std::vector<std::vector<int>> board, bool white_player) {
+    std::vector<std::vector<int>> moves = legal_moves(board, true);
+    for (std::vector<int> move : moves) {
+        std::cout << id_piece(get_piece(board, move[0])) << " from " << move[0] << " to " << move[1] << std::endl;
+    }
+}
+
 int main() {
     std::vector<std::vector<int>> board = new_board();
     bool white_turn = true;
 
-    /* std::vector<std::vector<int>> moves = legal_moves(board, true);
-    for (std::vector<int> move : moves) {
-        std::cout << id_piece(get_piece(board, move[0])) << " from " << move[0] << " to " << move[1] << std::endl;
-    }
+    // board = make_move(board, {52, 36});
+    // move_debug(board, true);
+
+    /* board = blank_board();
+    std::vector<int> dests = piece_moves(4, 19);
+    for (int dest : dests)
+        board[4][dest] = 1;
+    print_board(board);
     return 0; */
 
     while (true) { // testing game loop
@@ -608,14 +691,15 @@ int main() {
         std::vector<int> move;
         std::time_t start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         if (white_turn) {
-            move = search(4, board, 2, white_turn);
+            move = search(4, board, 3, white_turn);
             // move = {52, 36};
         } else {
-            move = search(4, board, 2, white_turn);
+            move = search(4, board, 3, white_turn);
             // move = {11, 27};
         }
         std::time_t finish_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::cout << "elapsed time: " << (finish_time - start_time) << std::endl;
+        std::cout << "move: " << notation_conv(move) << std::endl;
         if (move.size() == 0)
             break;
         int piece = get_piece(board, move[0]);
