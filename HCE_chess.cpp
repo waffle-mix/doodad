@@ -19,6 +19,8 @@ std::vector<std::vector<int>> make_move(std::vector<std::vector<int>> board, std
 bool threatened(std::vector<std::vector<int>> board, int index, bool white_player);
 bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king = true, bool ignore_own = false);
 std::vector<int> piece_moves(int piece, int index);
+int id_piece_char(char c);
+std::vector<std::vector<int>> blank_board();
 
 float evaluate(std::vector<std::vector<int>> board) {
     float white_score = count_ones(board[0]) * PAWN_VALUE + count_ones(board[1]) * BISHOP_VALUE + count_ones(board[2]) * KNIGHT_VALUE + count_ones(board[3]) * ROOK_VALUE + count_ones(board[4]) * QUEEN_VALUE;
@@ -74,7 +76,31 @@ std::vector<int> search(int algorithm, std::vector<std::vector<int>> board, int 
 }
 
 // convert a FEN string to board state
-// std::vector<std::vector<int>> fen_conv(std::string fen)
+std::vector<std::vector<int>> fen_conv(std::string fen) {
+    std::vector<char> board_string;
+    for (char c : fen) {
+        if (c == ' ')
+            break;
+        if (c == '/')
+            continue;
+        if (c > 48 && c <= 56) { // '0' shouldn't appear in the FEN string so c won't ever equal 48
+            int length = c - 48;
+            for (int i = 0; i < length; ++i)
+                board_string.push_back('_');
+            continue;
+        }
+        board_string.push_back(c);
+    }
+    // std::string str(board_string.begin(), board_string.end());
+    // std::cout << str << std::endl;
+    std::vector<std::vector<int>> board = blank_board();
+    for (int i = 0; i < board_string.size(); ++i) {
+        if (board_string[i] == '_')
+            continue;
+        board[id_piece_char(board_string[i])][i] = 1;
+    }
+    return board;
+}
 
 // convert move data in index form to a long algebraic notation string
 std::string notation_conv(std::vector<int> move) {
@@ -664,6 +690,36 @@ int get_piece(std::vector<std::vector<int>> board, int index) {
     return piece;
 }
 
+// return a piece index based on a character
+int id_piece_char(char c) {
+    if (c == 'P')
+        return 0;
+    else if (c == 'B')
+        return 1;
+    else if (c == 'N')
+        return 2;
+    else if (c == 'R')
+        return 3;
+    else if (c == 'Q')
+        return 4;
+    else if (c == 'K')
+        return 5;
+    else if (c == 'p')
+        return 6;
+    else if (c == 'b')
+        return 7;
+    else if (c == 'n')
+        return 8;
+    else if (c == 'r')
+        return 9;
+    else if (c == 'q')
+        return 10;
+    else if (c == 'k')
+        return 11;
+    else
+        return -1;
+}
+
 void move_debug(std::vector<std::vector<int>> board, bool white_player) {
     std::vector<std::vector<int>> moves = legal_moves(board, true);
     for (std::vector<int> move : moves) {
@@ -696,6 +752,13 @@ int main() {
         board[0][dest] = 1;
     print_board(board);
     return 0; */
+
+    // std::cout << "enter fen: ";
+    // std::string fen;
+    // std::cin >> fen;
+    board = fen_conv("r2qk2r/1p1bbppp/p2p1n2/n3p3/3pP3/2P2N1P/PP3PP1/RNBQRBK1 w kq - 0 11");
+    print_board(board);
+    return 0;
 
     std::cout << "white or black (enter w or b): ";
     std::string player;
@@ -738,6 +801,6 @@ int main() {
     }
     std::cout << "GAME OVER" << std::endl;
     std::string tmp;
-    std::cout << "press Enter to quit: ";
+    std::cout << "enter anything to quit: ";
     std::cin >> tmp;
 }
