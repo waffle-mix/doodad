@@ -22,6 +22,7 @@ std::vector<int> piece_moves(int piece, int index);
 int id_piece_char(char c);
 std::vector<std::vector<int>> blank_board();
 bool fen_stm(std::string fen);
+std::string notation_conv(std::vector<int> move);
 
 float evaluate(std::vector<std::vector<int>> board) {
     float white_score = count_ones(board[0]) * PAWN_VALUE + count_ones(board[1]) * BISHOP_VALUE + count_ones(board[2]) * KNIGHT_VALUE + count_ones(board[3]) * ROOK_VALUE + count_ones(board[4]) * QUEEN_VALUE;
@@ -380,13 +381,15 @@ bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int>
 
     if (check_king) {
         if (piece == 5) { // might help speed up some stuff
+            std::vector<std::vector<int>> new_board = board;
+            new_board[5][move[0]] = 0; // to prevent the king from "blocking" the check
             if (self_index == 0) { // white
-                if (threatened(board, destination, true)) {
+                if (threatened(new_board, destination, true)) {
                     // std::cout << "check_move: white king cannot move into a check" << std::endl;
                     return false;
                 }
             } else {
-                if (threatened(board, destination, false)) {
+                if (threatened(new_board, destination, false)) {
                     // std::cout << "check_move: black king cannot move into a check" << std::endl;
                     return false;
                 }
@@ -817,6 +820,27 @@ void uci() {
                 white_turn = true;
                 if (parsed[2] == "moves") {
                     for (int i = 3; i < parsed.size(); ++i) {
+                        if (parsed[i] == "O-O") { // makeshift castling fix
+                            if (white_turn) {
+                                board = make_move(board, {60, 62}, false);
+                                board = make_move(board, {63, 61}, false);
+                                continue;
+                            } else {
+                                board = make_move(board, {4, 6}, false);
+                                board = make_move(board, {7, 5}, false);
+                                continue;
+                            }
+                        } else if (parsed[i] == "O-O-O") {
+                            if (white_turn) {
+                                board = make_move(board, {60, 58}, false);
+                                board = make_move(board, {56, 59}, false);
+                                continue;
+                            } else {
+                                board = make_move(board, {4, 2}, false);
+                                board = make_move(board, {0, 3}, false);
+                                continue;
+                            }
+                        }
                         board = make_move(board, move_conv(parsed[i]));
                         white_turn = !white_turn;
                     }
@@ -839,47 +863,13 @@ void uci() {
 }
 
 int main() {
-    /* std::string str;
-    std::cin >> str;
-    std::cout << str << std::endl;
-    std::vector<std::string> parsed = split(str);
-    for (std::string s : parsed)
-        std::cout << s << std::endl; */
-
     uci();
 
     /* std::vector<std::vector<int>> board = new_board();
     bool white_turn = true;
-    bool white_player = true; */
+    bool white_player = true;
 
-    // board = make_move(board, {52, 36});
-    // move_debug(board, true);
-
-    /* board = blank_board();
-    std::vector<int> dests = piece_moves(0, 35);
-    for (int dest : dests)
-        board[0][dest] = 1;
-    print_board(board);
-    return 0; */
-
-    // std::string fen = "r2qk2r/1p1bbppp/p2p1n2/n3p3/3pP3/2P2N1P/PP3PP1/RNBQRBK1 w kq - 0 11";
-    // std::cout << "enter fen: ";
-    // std::cin >> fen;
-    /* board = fen_conv(fen);
-    print_board(board);
-    if (fen_stm(fen))
-        std::cout << "white to move" << std::endl;
-    else
-        std::cout << "black to move" << std::endl;
-    return 0; */
-
-    /* std::cout << "white or black (enter w or b): ";
-    std::string player;
-    std::cin >> player;
-    if (player == "b")
-        white_player = false; */
-
-    /* while (true) { // testing game loop
+    while (true) { // testing game loop
         print_board(board);
         std::cout << std::endl;
         std::vector<int> move;
