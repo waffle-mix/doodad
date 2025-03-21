@@ -820,26 +820,26 @@ void uci() {
                 white_turn = true;
                 if (parsed[2] == "moves") {
                     for (int i = 3; i < parsed.size(); ++i) {
-                        if (parsed[i] == "O-O") { // makeshift castling fix
-                            if (white_turn) {
-                                board = make_move(board, {60, 62}, false);
-                                board = make_move(board, {63, 61}, false);
-                                continue;
-                            } else {
-                                board = make_move(board, {4, 6}, false);
-                                board = make_move(board, {7, 5}, false);
-                                continue;
-                            }
-                        } else if (parsed[i] == "O-O-O") {
-                            if (white_turn) {
-                                board = make_move(board, {60, 58}, false);
-                                board = make_move(board, {56, 59}, false);
-                                continue;
-                            } else {
-                                board = make_move(board, {4, 2}, false);
-                                board = make_move(board, {0, 3}, false);
-                                continue;
-                            }
+                        if (parsed[i] == "e1g1") { // makeshift castling fix
+                            board = make_move(board, {60, 62}, false);
+                            board = make_move(board, {63, 61}, false);
+                            white_turn = !white_turn;
+                            continue;
+                        } else if (parsed[i] == "e8g8") {
+                            board = make_move(board, {4, 6}, false);
+                            board = make_move(board, {7, 5}, false);
+                            white_turn = !white_turn;
+                            continue;
+                        } else if (parsed[i] == "e1c1") {
+                            board = make_move(board, {60, 58}, false);
+                            board = make_move(board, {56, 59}, false);
+                            white_turn = !white_turn;
+                            continue;
+                        } else if (parsed[i] == "e8c8") {
+                            board = make_move(board, {4, 2}, false);
+                            board = make_move(board, {0, 3}, false);
+                            white_turn = !white_turn;
+                            continue;
                         }
                         board = make_move(board, move_conv(parsed[i]));
                         white_turn = !white_turn;
@@ -863,10 +863,10 @@ void uci() {
 }
 
 int main() {
-    std::vector<std::vector<int>> board = fen_conv("rnbN1bn1/3k4/2p1Q3/7p/pppB4/8/P2P1PPP/RN2R1K1 b - - 0 19");
+    /* std::vector<std::vector<int>> board = fen_conv("rnbN1bn1/3k4/2p1Q3/7p/pppB4/8/P2P1PPP/RN2R1K1 b - - 0 19");
     print_board(board);
     move_debug(board, fen_stm("rnbN1bn1/3k4/2p1Q3/7p/pppB4/8/P2P1PPP/RN2R1K1 b - - 0 19"));
-    return 0;
+    return 0; */
 
     uci();
 
