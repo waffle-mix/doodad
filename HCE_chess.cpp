@@ -136,7 +136,7 @@ std::string notation_conv(std::vector<int> move) {
 // convert a long algebraic notation string to move data
 std::vector<int> move_conv(std::string str) {
     std::string start = str.substr(0, 2);
-    std::string dest = str.substr(2, 4);
+    std::string dest = str.substr(2, 2);
     std::vector<int> move;
     std::vector<std::string> table = {
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
