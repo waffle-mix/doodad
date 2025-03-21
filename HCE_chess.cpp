@@ -764,9 +764,9 @@ int id_piece_char(char c) {
 }
 
 void move_debug(std::vector<std::vector<int>> board, bool white_player) {
-    std::vector<std::vector<int>> moves = legal_moves(board, true);
+    std::vector<std::vector<int>> moves = legal_moves(board, white_player);
     for (std::vector<int> move : moves) {
-        std::cout << id_piece(get_piece(board, move[0])) << " from " << move[0] << " to " << move[1] << std::endl;
+        std::cout << id_piece(get_piece(board, move[0])) << " from " << move[0] << " to " << move[1] << " (" << notation_conv(move) << ")" << std::endl;
     }
 }
 
@@ -863,6 +863,11 @@ void uci() {
 }
 
 int main() {
+    std::vector<std::vector<int>> board = fen_conv("rnbN1bn1/3k4/2p1Q3/7p/pppB4/8/P2P1PPP/RN2R1K1 b - - 0 19");
+    print_board(board);
+    move_debug(board, fen_stm("rnbN1bn1/3k4/2p1Q3/7p/pppB4/8/P2P1PPP/RN2R1K1 b - - 0 19"));
+    return 0;
+
     uci();
 
     /* std::vector<std::vector<int>> board = new_board();
