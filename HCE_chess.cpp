@@ -300,7 +300,6 @@ std::vector<int> piece_moves(int piece, int index) {
 }
 
 // check if a move is legal
-// remember to also make it check if the king is under check
 bool check_move(std::vector<std::vector<int>> board, int piece, std::vector<int> move, bool check_king, bool ignore_own) {
     int start = move[0];
     int destination = move[1];
@@ -754,13 +753,64 @@ std::vector<int> get_move() {
     return {start, dest};
 }
 
+std::vector<std::string> split(std::string input, char delimiter = ' ') {
+    std::vector<std::string> output = {{""}};
+    int index = 0;
+    for (char c : input) {
+        if (c == delimiter) {
+            output.push_back("");
+            ++index;
+            continue;
+        }
+        output[index] += c;
+    }
+    return output;
+}
+
 // main engine function
-// void uci()
+void uci() {
+    bool white_turn = true;
+    std::vector<std::vector<int>> board = new_board();
+    std::string command;
+    while (command != "quit") {
+        std::cin >> command;
+        if (command == "quit")
+            break;
+        else if (command == "uci") {
+            std::cout << "id name doodad 1.0" << std::endl;
+            std::cout << "id author Waffle_Mix" << std::endl;
+            std::cout << "uciok" << std::endl;
+        } else if (command == "isready")
+            std::cout << "readyok" << std::endl;
+        else if (command == "ucinewgame")
+            board = new_board();
+        else if (split(command)[0] == "position") {
+            std::vector<std::string> parsed = split(command);
+            if (parsed[1] == "startpos")
+                board = new_board();
+            else if (parsed[1] == "fen") {
+                board = fen_conv(parsed[2]);
+                if (parsed[3] == "w")
+                    white_turn = true;
+                else
+                    white_turn = false;
+            }
+        } else if (split(command)[0] == "go") {
+            std::vector<std::string> parsed = split(command);
+            if (parsed[1] == "depth") {
+                std::string move = notation_conv(search(4, board, parsed[2][0] - 48, white_turn));
+                std::cout << "bestmove " << move << std::endl;
+            }
+        }
+    }
+}
 
 int main() {
-    std::vector<std::vector<int>> board = new_board();
+    uci();
+
+    /* std::vector<std::vector<int>> board = new_board();
     bool white_turn = true;
-    bool white_player = true;
+    bool white_player = true; */
 
     // board = make_move(board, {52, 36});
     // move_debug(board, true);
@@ -772,24 +822,24 @@ int main() {
     print_board(board);
     return 0; */
 
-    std::string fen = "r2qk2r/1p1bbppp/p2p1n2/n3p3/3pP3/2P2N1P/PP3PP1/RNBQRBK1 w kq - 0 11";
+    // std::string fen = "r2qk2r/1p1bbppp/p2p1n2/n3p3/3pP3/2P2N1P/PP3PP1/RNBQRBK1 w kq - 0 11";
     // std::cout << "enter fen: ";
     // std::cin >> fen;
-    board = fen_conv(fen);
+    /* board = fen_conv(fen);
     print_board(board);
     if (fen_stm(fen))
         std::cout << "white to move" << std::endl;
     else
         std::cout << "black to move" << std::endl;
-    return 0;
+    return 0; */
 
-    std::cout << "white or black (enter w or b): ";
+    /* std::cout << "white or black (enter w or b): ";
     std::string player;
     std::cin >> player;
     if (player == "b")
-        white_player = false;
+        white_player = false; */
 
-    while (true) { // testing game loop
+    /* while (true) { // testing game loop
         print_board(board);
         std::cout << std::endl;
         std::vector<int> move;
@@ -825,5 +875,5 @@ int main() {
     std::cout << "GAME OVER" << std::endl;
     std::string tmp;
     std::cout << "enter anything to quit: ";
-    std::cin >> tmp;
+    std::cin >> tmp; */
 }
