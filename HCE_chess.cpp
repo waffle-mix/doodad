@@ -132,6 +132,31 @@ std::string notation_conv(std::vector<int> move) {
     return (table[move[0]] + table[move[1]]);
 }
 
+// convert a long algebraic notation string to move data
+std::vector<int> move_conv(std::string str) {
+    std::string start = str.substr(0, 2);
+    std::string dest = str.substr(2, 4);
+    std::vector<int> move;
+    std::vector<std::string> table = {
+        "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+        "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+        "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+        "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+        "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+        "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+        "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"};
+    for (int i = 0; i < 64; ++i) {
+        if (start == table[i])
+            move.push_back(i);
+    }
+    for (int i = 0; i < 64; ++i) {
+        if (dest == table[i])
+            move.push_back(i);
+    }
+    return move;
+}
+
 int check(std::vector<std::vector<int>> board) {
     // if white is checking black: 1
     // if black is checking white: -1
@@ -773,7 +798,7 @@ void uci() {
     std::vector<std::vector<int>> board = new_board();
     std::string command;
     while (command != "quit") {
-        std::cin >> command;
+        std::getline(std::cin, command);
         if (command == "quit")
             break;
         else if (command == "uci") {
@@ -782,13 +807,21 @@ void uci() {
             std::cout << "uciok" << std::endl;
         } else if (command == "isready")
             std::cout << "readyok" << std::endl;
-        else if (command == "ucinewgame")
+        else if (command == "ucinewgame") {
             board = new_board();
-        else if (split(command)[0] == "position") {
+            white_turn = true;
+        } else if (split(command)[0] == "position") {
             std::vector<std::string> parsed = split(command);
-            if (parsed[1] == "startpos")
+            if (parsed[1] == "startpos") {
                 board = new_board();
-            else if (parsed[1] == "fen") {
+                white_turn = true;
+                if (parsed[2] == "moves") {
+                    for (int i = 3; i < parsed.size(); ++i) {
+                        board = make_move(board, move_conv(parsed[i]));
+                        white_turn = !white_turn;
+                    }
+                }
+            } else if (parsed[1] == "fen") {
                 board = fen_conv(parsed[2]);
                 if (parsed[3] == "w")
                     white_turn = true;
@@ -806,6 +839,13 @@ void uci() {
 }
 
 int main() {
+    /* std::string str;
+    std::cin >> str;
+    std::cout << str << std::endl;
+    std::vector<std::string> parsed = split(str);
+    for (std::string s : parsed)
+        std::cout << s << std::endl; */
+
     uci();
 
     /* std::vector<std::vector<int>> board = new_board();
