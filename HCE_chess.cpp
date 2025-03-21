@@ -55,6 +55,18 @@ float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha,
     return best_eval;
 }
 
+/* unsigned long long perft(std::vector<std::vector<int>> board, int depth, bool white_turn) {
+    if (depth == 0);
+        return 1;
+    std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
+    if (moves.size() == 0)
+        return 1;
+    int count = 0;
+    for (std::vector<int> move : moves)
+        count += perft(make_move(board, move), depth - 1, !white_turn);
+    return count;
+} */
+
 std::vector<int> search(int algorithm, std::vector<std::vector<int>> board, int limit, bool white_player) {
     std::vector<int> best_move;
     
@@ -813,6 +825,12 @@ void uci() {
         else if (command == "ucinewgame") {
             board = new_board();
             white_turn = true;
+        } else if (command == "print") {
+            print_board(board);
+            if (white_turn)
+                std::cout << "white to move" << std::endl;
+            else
+                std::cout << "black to move" << std::endl;
         } else if (split(command)[0] == "position") {
             std::vector<std::string> parsed = split(command);
             if (parsed[1] == "startpos") {
@@ -853,6 +871,35 @@ void uci() {
                     white_turn = true;
                 else
                     white_turn = false;
+                if (parsed[8] == "moves") {
+                    for (int i = 9; i < parsed.size(); ++i) {
+                        if ((get_piece(board, move_conv(parsed[i])[0]) % 6) == 5) {
+                            if (parsed[i] == "e1g1") { // makeshift castling fix
+                                board = make_move(board, {60, 62}, false);
+                                board = make_move(board, {63, 61}, false);
+                                white_turn = !white_turn;
+                                continue;
+                            } else if (parsed[i] == "e8g8") {
+                                board = make_move(board, {4, 6}, false);
+                                board = make_move(board, {7, 5}, false);
+                                white_turn = !white_turn;
+                                continue;
+                            } else if (parsed[i] == "e1c1") {
+                                board = make_move(board, {60, 58}, false);
+                                board = make_move(board, {56, 59}, false);
+                                white_turn = !white_turn;
+                                continue;
+                            } else if (parsed[i] == "e8c8") {
+                                board = make_move(board, {4, 2}, false);
+                                board = make_move(board, {0, 3}, false);
+                                white_turn = !white_turn;
+                                continue;
+                            }
+                        }
+                        board = make_move(board, move_conv(parsed[i]));
+                        white_turn = !white_turn;
+                    }
+                }
             }
         } else if (split(command)[0] == "go") {
             std::vector<std::string> parsed = split(command);
