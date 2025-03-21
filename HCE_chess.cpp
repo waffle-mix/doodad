@@ -825,12 +825,15 @@ void uci() {
         else if (command == "ucinewgame") {
             board = new_board();
             white_turn = true;
-        } else if (command == "print") {
-            print_board(board);
-            if (white_turn)
-                std::cout << "white to move" << std::endl;
-            else
-                std::cout << "black to move" << std::endl;
+        } else if (split(command)[0] == "print") {
+            if (split(command)[1] == "board") {
+                print_board(board);
+                if (white_turn)
+                    std::cout << "white to move" << std::endl;
+                else
+                    std::cout << "black to move" << std::endl;
+            } else if (split(command)[1] == "moves")
+                move_debug(board, white_turn);
         } else if (split(command)[0] == "position") {
             std::vector<std::string> parsed = split(command);
             if (parsed[1] == "startpos") {
