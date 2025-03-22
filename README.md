@@ -7,4 +7,4 @@ It's not UCI compatible yet but it will be eventually.
 
 I also plan to implement somewhat important chess features such as castling and en passant in the future, as well as iterative deepening.
 
-BTW, my movegen is perfectly fine, shut up.
+BTW, my movegen is perfectly fine.
