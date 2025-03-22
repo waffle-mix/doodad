@@ -10,7 +10,7 @@
 #define KNIGHT_VALUE 3
 #define ROOK_VALUE 5
 #define QUEEN_VALUE 9
-#define CHECK_BIAS 12
+// #define CHECK_BIAS 12 engine may end up sacrificing pieces just to check the opponent
 
 int count_ones(std::vector<int> bitboard);
 int check(std::vector<std::vector<int>> board);
@@ -28,7 +28,7 @@ void move_debug(std::vector<std::vector<int>> board, bool white_player);
 float evaluate(std::vector<std::vector<int>> board) {
     float white_score = count_ones(board[0]) * PAWN_VALUE + count_ones(board[1]) * BISHOP_VALUE + count_ones(board[2]) * KNIGHT_VALUE + count_ones(board[3]) * ROOK_VALUE + count_ones(board[4]) * QUEEN_VALUE;
     float black_score = count_ones(board[6]) * PAWN_VALUE + count_ones(board[7]) * BISHOP_VALUE + count_ones(board[8]) * KNIGHT_VALUE + count_ones(board[9]) * ROOK_VALUE + count_ones(board[10]) * QUEEN_VALUE;
-    return (white_score - black_score + check(board) * CHECK_BIAS);
+    return (white_score - black_score); // + check(board) * CHECK_BIAS);
 }
 
 float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha, float beta, bool white_player) {
@@ -933,7 +933,7 @@ void uci() {
             } else if (parsed[1] == "eval") {
                 std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
                 for (std::vector<int> move : moves) {
-                    std::cout << notation_conv(move) << ": " << negamax_depth(board, string_num(parsed[2]), INT_MIN, INT_MAX, !white_turn) << std::endl;
+                    std::cout << notation_conv(move) << ": " << -negamax_depth(make_move(board, move, false), string_num(parsed[2]), INT_MIN, INT_MAX, !white_turn) << std::endl;
                 }
             }
         }
