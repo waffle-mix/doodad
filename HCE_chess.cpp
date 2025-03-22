@@ -23,6 +23,7 @@ int id_piece_char(char c);
 std::vector<std::vector<int>> blank_board();
 bool fen_stm(std::string fen);
 std::string notation_conv(std::vector<int> move);
+void move_debug(std::vector<std::vector<int>> board, bool white_player);
 
 float evaluate(std::vector<std::vector<int>> board) {
     float white_score = count_ones(board[0]) * PAWN_VALUE + count_ones(board[1]) * BISHOP_VALUE + count_ones(board[2]) * KNIGHT_VALUE + count_ones(board[3]) * ROOK_VALUE + count_ones(board[4]) * QUEEN_VALUE;
@@ -55,17 +56,15 @@ float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha,
     return best_eval;
 }
 
-/* unsigned long long perft(std::vector<std::vector<int>> board, int depth, bool white_turn) {
-    if (depth == 0);
+unsigned long perft(std::vector<std::vector<int>> board, int depth, bool white_turn) {
+    if (depth <= 0)
         return 1;
     std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
-    if (moves.size() == 0)
-        return 1;
-    int count = 0;
+    unsigned long count = 0;
     for (std::vector<int> move : moves)
-        count += perft(make_move(board, move), depth - 1, !white_turn);
+        count += perft(make_move(board, move, false), depth - 1, !white_turn);
     return count;
-} */
+}
 
 std::vector<int> search(int algorithm, std::vector<std::vector<int>> board, int limit, bool white_player) {
     std::vector<int> best_move;
@@ -909,6 +908,13 @@ void uci() {
             if (parsed[1] == "depth") {
                 std::string move = notation_conv(search(4, board, parsed[2][0] - 48, white_turn));
                 std::cout << "bestmove " << move << std::endl;
+            } else if (parsed[1] == "perft") {
+                std::cout << "perft: " << perft(board, parsed[2][0] - 48, white_turn) << std::endl;
+            } else if (parsed[1] == "splitperft") {
+                std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
+                for (std::vector<int> move : moves) {
+                    std::cout << notation_conv(move) << ": " << perft(make_move(board, move, false), parsed[2][0] - 48, !white_turn) << std::endl;
+                }
             }
         }
     }
