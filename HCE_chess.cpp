@@ -806,6 +806,17 @@ std::vector<std::string> split(std::string input, char delimiter = ' ') {
     return output;
 }
 
+// convert a number in string form to int. does not support decimals.
+int string_num(std::string str) {
+    int num = 0;
+    for (char c : str) {
+        if (c < '0' || c > '9')
+            break;
+        num = 10 * num + (c - 48);
+    }
+    return num;
+}
+
 // main engine function
 void uci() {
     bool white_turn = true;
@@ -906,14 +917,23 @@ void uci() {
         } else if (split(command)[0] == "go") {
             std::vector<std::string> parsed = split(command);
             if (parsed[1] == "depth") {
-                std::string move = notation_conv(search(4, board, parsed[2][0] - 48, white_turn));
+                std::string move = notation_conv(search(4, board, string_num(parsed[2]), white_turn));
                 std::cout << "bestmove " << move << std::endl;
             } else if (parsed[1] == "perft") {
-                std::cout << "perft: " << perft(board, parsed[2][0] - 48, white_turn) << std::endl;
-            } else if (parsed[1] == "splitperft") {
+                std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
+                unsigned long nodes = 0;
+                for (std::vector<int> move : moves) {
+                    unsigned long child_nodes = perft(make_move(board, move, false), string_num(parsed[2]), !white_turn);
+                    std::cout << notation_conv(move) << ": " << child_nodes << std::endl;
+                    nodes += child_nodes;
+                }
+                std::cout << std::endl;
+                std::cout << moves.size() << " child nodes" << std::endl;
+                std::cout << nodes << " total nodes" << std::endl;
+            } else if (parsed[1] == "eval") {
                 std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
                 for (std::vector<int> move : moves) {
-                    std::cout << notation_conv(move) << ": " << perft(make_move(board, move, false), parsed[2][0] - 48, !white_turn) << std::endl;
+                    std::cout << notation_conv(move) << ": " << negamax_depth(board, string_num(parsed[2]), INT_MIN, INT_MAX, !white_turn) << std::endl;
                 }
             }
         }
