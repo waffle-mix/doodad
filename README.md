@@ -38,4 +38,4 @@ go eval *depth*
 
 
 # other notes:
-I must admit, this engine is absolutely awful. It is still horrendously slow and its evaluation is just complete shit. Its search is almost certainly bugged, and I bet there are countless other bugs I haven't discovered yet. It doesn't even use bitboards (sacrilegious, I know). I just wish I had that voodoo dark magic that real engine devs have.
+I must admit, this engine is absolutely awful. Despite all of the improvements, it is still horrendously slow and its evaluation is just complete shit. Its search is almost certainly bugged, and I bet there are countless other bugs I haven't discovered yet. It doesn't even use bitboards (sacrilegious, I know). I just wish I had that voodoo dark magic that real engine devs have.
