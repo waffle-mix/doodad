@@ -56,6 +56,51 @@ float negamax_depth(std::vector<std::vector<int>> board, int depth, float alpha,
     return best_eval;
 }
 
+// print out search tree for debugging purposes
+/* float negamax_depth_tree(std::vector<std::vector<int>> board, int depth, float alpha, float beta, bool white_player, int tabs) {
+    float best_eval = INT_MIN;  
+    if (depth <= 0) {
+        if (white_player)
+            return evaluate(board);
+        else
+            return -evaluate(board);
+    }
+
+    std::vector<std::vector<int>> moves = legal_moves(board, white_player);
+    if (moves.size() == 0) {
+        if (check(board) == 0)
+            return 0; // stalemate
+        return best_eval; // checkmate
+    }
+    
+    for (int i = 0; i < tabs; ++i)
+        std::cout << "\t";
+    
+    if (white_player)
+        std::cout << "white to move";
+    else
+        std::cout << "black to move";
+    std::cout << ", depth = " << tabs << std::endl;
+    
+    for (std::vector<int> move : moves) {
+        for (int i = 0; i < tabs; ++i)
+            std::cout << "\t";
+        std::cout << notation_conv(move) << ": ";
+        float eval = -negamax_depth(make_move(board, move, false), depth - 1, -beta, -alpha, !white_player);
+        std::cout << eval;
+        if (eval > best_eval)
+            best_eval = eval;
+        alpha = std::fmax(alpha, best_eval);
+        if (alpha >= beta) {
+            std::cout << " [branch pruned]";
+            break;
+        }
+        std::cout << std::endl;
+        negamax_depth_tree(make_move(board, move, false), depth - 1, -beta, -alpha, !white_player, tabs + 1);
+    }
+    return best_eval;
+} */
+
 unsigned long perft(std::vector<std::vector<int>> board, int depth, bool white_turn) {
     if (depth <= 0)
         return 1;
@@ -931,11 +976,17 @@ void uci() {
                 std::cout << moves.size() << " child nodes" << std::endl;
                 std::cout << nodes << " total nodes" << std::endl;
             } else if (parsed[1] == "eval") {
-                std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
-                for (std::vector<int> move : moves) {
-                    std::cout << notation_conv(move) << ": " << -negamax_depth(make_move(board, move, false), string_num(parsed[2]), INT_MIN, INT_MAX, !white_turn) << std::endl;
+                if (parsed.size() == 2) {
+                    std::cout << "current board eval: " << evaluate(board) << std::endl;
+                } else {
+                    std::vector<std::vector<int>> moves = legal_moves(board, white_turn);
+                    for (std::vector<int> move : moves) {
+                        std::cout << notation_conv(move) << ": " << -negamax_depth(make_move(board, move, false), string_num(parsed[2]), INT_MIN, INT_MAX, !white_turn) << std::endl;
+                    }
                 }
-            }
+            } /* else if (parsed[1] == "tree") {
+                negamax_depth_tree(board, string_num(parsed[2]), INT_MIN, INT_MAX, white_turn, 0);
+            } */
         }
     }
 }
